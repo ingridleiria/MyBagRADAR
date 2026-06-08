@@ -99,7 +99,11 @@
 
   ## Author
 
-  Built by **Ingrid Leiria** — a reseller-market enthusiast and researcher exploring whether luxury handbags can be evaluated as a genuine, measurable asset class, so that people can make smarter, data-backed decisions with their money.
+  Built by **[Ingrid Leiria](https://kr.linkedin.com/in/ingrid-leiria-25b4767a)** — Chief of Staff and an advocate for AI enablement at her current company, currently pursuing a **PhD in Economics (Applied Microeconometrics) in South Korea**.
+
+  She's also a reseller-market enthusiast exploring whether luxury handbags can be evaluated as a genuine, measurable asset class — so that people can make smarter, data-backed decisions with their money.
+
+  🔗 Connect on [LinkedIn](https://kr.linkedin.com/in/ingrid-leiria-25b4767a)
 
   ---
 
