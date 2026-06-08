@@ -4,6 +4,8 @@
 
   🌐 Live: [MyBagRADAR.com](https://mybagradar.com) · 🌍 Trilingual: English · 한국어 · Português
 
+  ![MyBagRADAR home page](./assets/homepage.jpg)
+
   ---
 
   ## What it is
@@ -17,6 +19,18 @@
   - **What is a fair price right now**, across platforms and across two countries?
 
   The end goal is an **investment score grounded in econometric models** estimated directly from the panel — not opinion, not vibes.
+
+  ---
+
+  ## The vision
+
+  I'm building MyBagRADAR because **I want to help people make better decisions with their money** — and that includes myself.
+
+  I'm a fan of the resale market. I've **bought handbags second-hand**, and I've **resold some of them too**, so I know first-hand how confusing and opaque this market can be: prices are all over the place, "is this a good investment?" usually gets answered with a gut feeling, and almost no one can tell you how *quickly* a given bag will actually sell.
+
+  My goal is to change that. I want anyone — whether you're buying your first pre-loved bag, deciding what to resell, or treating bags as a real asset class — to be able to **navigate this market with data instead of guesswork**. If MyBagRADAR helps even one person avoid overpaying, or sell faster, or choose a bag that actually holds its value, it's doing its job.
+
+  In the future I want MyBagRADAR to be the place people trust to answer one simple question: *"Is this bag a smart decision for my money — and how easily could I get that money back?"*
 
   ---
 
@@ -85,7 +99,7 @@
 
   ## Author
 
-  Built by **Ingrid Leiria** as a research-driven product exploring whether luxury handbags can be evaluated as a genuine, measurable asset class.
+  Built by **Ingrid Leiria** — a reseller-market enthusiast and researcher exploring whether luxury handbags can be evaluated as a genuine, measurable asset class, so that people can make smarter, data-backed decisions with their money.
 
   ---
 
