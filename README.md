@@ -61,6 +61,8 @@
 
   Combining these into a single, defensible **investment score** is the core research contribution. The methodology is being developed toward academic publication standards (reproducible exports, documented covariates, honest treatment of censoring and selection).
 
+  ![Investment analysis — "Is It Worth Buying?"](./assets/invest.jpg)
+
   ---
 
   ## Coverage
