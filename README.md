@@ -79,13 +79,91 @@
 
   ---
 
-  ## Tech stack
+  ## Architecture
 
-  - **Frontend:** React + Vite + TailwindCSS (trilingual EN / KO / PT)
-  - **API:** Node.js + Express
-  - **Database:** PostgreSQL + Drizzle ORM (with `pgvector` for AI semantic search)
-  - **AI:** natural-language "describe the bag" search and an investment advisor
-  - **Data science:** longitudinal panel, survival analysis, and hedonic/value-retention models (reference scripts in Stata, R, and Python)
+  MyBagRADAR is a **pnpm monorepo** with a clean separation between deployable apps and shared libraries, built **contract-first**: a single OpenAPI specification is the source of truth, and typed clients (React Query hooks) plus runtime validators (Zod) are **code-generated** from it — so the frontend and backend can never silently drift apart.
+
+  ```
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Frontend (React + Vite + Tailwind)   ← trilingual EN/KO/PT  │
+  │  TanStack Query · wouter · Recharts · generated typed hooks   │
+  └───────────────┬──────────────────────────────────────────────┘
+                  │  OpenAPI contract → Orval codegen (hooks + Zod)
+  ┌───────────────▼──────────────────────────────────────────────┐
+  │  API server (Express 5, ~30 route modules)                    │
+  │  search · compare · invest · rankings · analytics · export    │
+  │  AI search (SSE) · admin · auth (Clerk) · cron scheduler      │
+  └───────┬───────────────────────────────┬──────────────────────┘
+          │                               │
+  ┌───────▼─────────────┐      ┌──────────▼───────────────────────┐
+  │  PostgreSQL          │      │  Data pipeline                    │
+  │  Drizzle ORM         │      │  per-platform scrapers →          │
+  │  + pgvector (HNSW)   │      │  guardrails → attribute extractors│
+  │  longitudinal panel  │      │  → quality scoring → quarantine   │
+  │  + price history     │      │  sweep → daily CSV export to repo │
+  └──────────────────────┘      └───────────────────────────────────┘
+  ```
+
+  **Layers**
+
+  - **Frontend** — React + Vite + TailwindCSS, `wouter` routing, TanStack Query for data, Recharts for price/trend charts, full trilingual EN / KO / PT i18n.
+  - **API** — Express 5 with ~30 route modules (search, compare, invest, rankings, analytics, exports, AI search, admin, auth, methodology). Authentication via **Clerk**.
+  - **Database** — PostgreSQL + **Drizzle ORM**, with **pgvector** (HNSW cosine index) for semantic search. The schema is instrumented for research: a daily longitudinal panel, price history, survival/sold-event fields, cross-platform clusters, FX history, and macro indicators.
+  - **Data pipeline** — per-platform scrapers → defense-in-depth guardrails (category / price floor / ceiling) → deterministic + AI attribute extractors → quality scoring → reversible quarantine sweep → daily CSV exports auto-published to the research-dataset repo.
+  - **Scheduler** — a full cron suite (daily scrapes per country, price-history backfill, brand snapshots, cross-platform dedup, relisting detection, macro pulls, dataset publishing, outreach waves, anomaly auto-heal).
+
+  ---
+
+  ## AI & LLM models
+
+  MyBagRADAR uses a **multi-model strategy** — the right model for each job — accessed through the Replit AI Integrations proxy and direct provider APIs:
+
+  | Model | Provider | What it does here |
+  |-------|----------|-------------------|
+  | **Gemini 2.5 Flash** | Google | Extracts structured attributes from free-text listings; parses natural-language search queries ("describe the bag"); generates per-listing relevance rationale (streamed). |
+  | **Gemini 2.5 Flash (Vision)** | Google | Identifies brand/model from an uploaded photo (image search). |
+  | **GPT-4o Vision** | OpenAI | Fallback image identification when the vision pass is low-confidence. |
+  | **text-embedding-3-small** | OpenAI | 1536-dim embeddings powering semantic similarity search over `pgvector` (HNSW cosine). |
+  | **Claude Sonnet 4.6** | Anthropic | The Investment Advisor — reasons over real price/retention/liquidity data to produce buy/hold/skip guidance and answer follow-up questions. |
+  | **Claude Haiku 4.5** | Anthropic | Fast, cheap "is this actually a handbag?" validation to keep the dataset clean. |
+  | **Perplexity Sonar** | Perplexity | Real-time retail-price research **with citations** (current boutique prices for the new-vs-resale projections). |
+
+  > **Cost-aware by design.** Deterministic regex/keyword extractors always run first; an LLM is only invoked when the rules can't resolve an attribute. Results are cached (a persistent extraction cache keyed by content hash), so re-scrapes cost effectively zero, and new listings are embedded in batches.
+
+  Offline research tooling (one-off brand-catalog and alias research) additionally uses **Claude Opus** and **GPT-4o-mini**.
+
+  ---
+
+  ## External APIs & services
+
+  - **ScraperAPI** — primary scraping transport for the resale platforms.
+  - **Bright Data** — Web Unlocker for bot-protected sites (e.g. Farfetch / Akamai), a browser/CDP session for JavaScript-heavy platforms, and residential proxying.
+  - **open.er-api.com** — daily KRW / BRL / USD foreign-exchange rates (persisted for reproducibility).
+  - **Resend** — transactional email (contact form, partner outreach).
+  - **Clerk** — user authentication and admin gating.
+  - **GitHub REST API** — automated daily publishing of the research dataset to the companion repo.
+  - **Naver & Google Search** — retail-price discovery for anchoring resale against original price.
+  - **Farfetch** — boutique-benchmark medians and live in-stock comparisons.
+
+  ---
+
+  ## How it was built
+
+  This is not a weekend project. MyBagRADAR is the product of **thousands of carefully iterated prompts** and deliberate engineering decisions, layered over months: designing per-platform scrapers that survive anti-bot defenses, encoding strict data-integrity rules (real data only, bags only, reversible quarantine — never deletion), building the multi-model AI stack above, and instrumenting the database for serious econometric research rather than just display.
+
+  Every fix, recalibration, and methodology decision is documented and dated, because the goal is a dataset and a scoring methodology that can stand up to **academic scrutiny** — reproducible, transparent, and honest about its limitations.
+
+  ---
+
+  ## Tech stack (summary)
+
+  - **Languages/runtime:** TypeScript, Node.js (pnpm workspaces)
+  - **Frontend:** React · Vite · TailwindCSS · TanStack Query · wouter · Recharts
+  - **API:** Express 5 · OpenAPI + Orval codegen · Zod validation
+  - **Database:** PostgreSQL · Drizzle ORM · pgvector
+  - **AI:** Gemini 2.5 Flash · OpenAI embeddings + GPT-4o vision · Claude Sonnet/Haiku · Perplexity Sonar
+  - **Infra/services:** ScraperAPI · Bright Data · Clerk · Resend · GitHub API
+  - **Data science:** longitudinal panel · survival analysis (Kaplan–Meier / Cox PH) · hedonic & value-retention models (reference scripts in Stata, R, Python)
 
   ---
 
